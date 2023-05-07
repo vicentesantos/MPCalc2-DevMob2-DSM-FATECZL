@@ -1,92 +1,78 @@
-import React, { useState } from 'react'
-import { SafeAreaView, View, Text, TouchableOpacity } from 'react-native'
+import React from 'react'
+import { useState } from 'react'
+import { Text, View } from 'react-native'
 import estilo from './src/estilo'
+import Basica from './src/Basica/Basica'
+import Trigonometria from '.src/Trigonometria/Trigonometria'
+import Aritmetica from '.src/Aritmetica/Aritmetica'
+import  Calculadora  from './src/Calculadora'
 
 export default App => {
-  const buttons = ['AC', 'DEL', '%', '/', '7', '8', '9', '*', '4', '5', '6', '-', '3', '2', '1', '+', '0', '.', '+/-', '=']
+  const [currentNumber, setCurrentNumber] = useState('');
+  const [lastNumber, setLastNumber] = useState('');
+  const [trigonometria, setTrigonometria] = useState('');
+  const [aritmetica, setAritmetica] = useState('DEC');
 
-  const [currentNumber, setCurrentNumber] = useState('')
-  const [lastNumber, setLastNumber] = useState('')
-
-  function Calculator() {
-    const splitNumbers = currentNumber.split(' ')
-    const fistNumber = parseFloat(splitNumbers[0])
-    const lastNumber = parseFloat(splitNumbers[2])
-    const operator = splitNumbers[1]
-
-    switch(operator){
+  function handleInputBasic(buttonPressed) {
+    switch (buttonPressed) {
       case '+':
-        setCurrentNumber((fistNumber + lastNumber).toString())
-        return
-      case '-': 
-        setCurrentNumber((fistNumber - lastNumber).toString())
-        return
-      case '*':
-        setCurrentNumber((fistNumber * lastNumber).toString())
-        return
-      case '/': 
-        setCurrentNumber((fistNumber / lastNumber).toString())
-        return
+      case '-':
+      case 'x':
+      case '/':
+        setCurrentNumber(currentNumber + ' ' + buttonPressed + ' ');
+        return;
+      case 'DEL':
+        setCurrentNumber(currentNumber.substring(0, currentNumber.length - 1));
+        return;
+      case 'LIMPAR': // Limpa todo o conteúdo
+        setLastNumber('');
+        setCurrentNumber('');
+        setAritmetica('DEC');
+        setTrigonometria('');
+        return;
+      case '=':
+        setLastNumber(currentNumber + ' = ');
+        setCurrentNumber(
+          Calculadora(
+            currentNumber,
+            trigonometria,
+            aritmetica
+          )
+        );
+        return;
+      case '+/-':
+        setCurrentNumber((-1 * currentNumber).toString());
+        return;
     }
+
+    setCurrentNumber(currentNumber + buttonPressed);
   }
 
-  function handleInput(buttonPressed) {
-    if (buttonPressed === "*" | buttonPressed === "/" | buttonPressed === "+" | buttonPressed === "-") {
-      setCurrentNumber(currentNumber + " " + buttonPressed + " ")
-      return
-    }
-    if (buttonPressed === "DEL") {
-      console.log(currentNumber)
-      setCurrentNumber(currentNumber.substring(0, (currentNumber.length - 1)))
-      return
-    }
-    if (buttonPressed === ".") {
-      setCurrentNumber(currentNumber + buttonPressed)
-      return
-    }
-    if (buttonPressed === "AC") {
-      setLastNumber("")
-      setCurrentNumber("")
-      return
-    }
-    if (buttonPressed === "=") {
-      setLastNumber(currentNumber + " = ")
-      Calculator()
-      return
-    }
-    setCurrentNumber(currentNumber + buttonPressed)
+  function handleInputTrigonometria(buttonPressed) {
+    if (buttonPressed != trigonometria)
+      setTrigonometria(buttonPressed);
+    else setTrigonometria('');
+  }
+
+  function handleInputArtimetica(buttonPressed) {
+    setAritmetica(buttonPressed);
   }
 
   return (
-    <SafeAreaView style={estilo.container}>
-      <View style={estilo.result}>
-        <Text style={estilo.historyText}> {lastNumber} </Text>
-        <Text style={estilo.resultText}> {currentNumber} </Text>
+    <>
+      <View style={estilo.container}>
+        <View style={estilo.result}>
+          <Text style={estilo.historyText}>{lastNumber}</Text>
+          <Text style={estilo.resultText}>{currentNumber}</Text>
+          <Text style={estilo.historyText}>
+            {trigonometria} {aritmetica}
+          </Text>
+        </View>
+        <Aritmetica action={handleInputArtimetica} />
+        <Trigonometria action={handleInputTrigonometria} />
+        <Basica action={handleInputBasic} />
       </View>
-      <View style={estilo.button}>
-        {buttons.map((button) =>
-          button === '=' ?
-            <TouchableOpacity onPress={() => handleInput(button)} key={button} style={[estilo.buttons, { backgroundColor: 'orange' }]}>
-              <Text style={[estilo.textButton, { color: "white" }]}>{button}</Text>
-            </TouchableOpacity>
-            :
-            button === 'AC' |
-              button === 'DEL' |
-              button === '+/-' |
-              button === '%' |
-              button === '*' |
-              button === '/' |
-              button === '+' |
-              button === '-' ?
-              <TouchableOpacity onPress={() => handleInput(button)} key={button} style={estilo.button}>
-                <Text style={[estilo.textButton, { color: "orange" }]}>{button}</Text>
-              </TouchableOpacity>
-              :
-              <TouchableOpacity onPress={() => handleInput(button)} key={button} style={estilo.button}>
-                <Text style={estilo.textButton}>{button}</Text>
-              </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+    </>
   );
-}
+};
+
